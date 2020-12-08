@@ -9,6 +9,21 @@
 #include <vector>
 #include <list>
 
+using RandomByteIterator = eld::iterator_adapter<uint8_t,
+        std::random_access_iterator_tag>;
+using RandomByteConstIterator = eld::const_iterator_adapter<uint8_t,
+        std::random_access_iterator_tag>;
+
+void sort(RandomByteIterator begin, RandomByteIterator end)
+{
+    std::sort(begin, end);
+}
+
+std::ptrdiff_t distance(RandomByteConstIterator cbegin, RandomByteConstIterator cend)
+{
+    return std::distance(cbegin, cend);
+}
+
 TEST(iterator_adapter, vector_distance)
 {
     std::vector<int> vec(64);
@@ -24,6 +39,17 @@ TEST(iterator_adapter, vector_distance)
     ASSERT_EQ(distance, distanceVec);
 }
 
+TEST(iterator_adapter, vector_distance_wrapped)
+{
+    std::vector<int> vec(64);
+    auto distanceVec = std::distance(vec.cbegin(), vec.cend());
+
+    const auto& constRefVec = vec;
+    auto dist = distance(constRefVec.cbegin(), constRefVec.cend());
+
+    ASSERT_EQ(dist, distanceVec);
+}
+
 TEST(iterator_adapter, vector_sorting)
 {
     std::vector<int> vec(64);
@@ -31,6 +57,17 @@ TEST(iterator_adapter, vector_sorting)
     std::shuffle(vec.begin(), vec.end(), std::mt19937{std::random_device{}()});
 
     std::sort(eld::make_iter_adapter(vec.begin()), eld::make_iter_adapter(vec.end()));
+
+    ASSERT_TRUE(std::is_sorted(vec.cbegin(), vec.cend()));
+}
+
+TEST(iterator_adapter, vector_sorting_wrapped)
+{
+    std::vector<int> vec(64);
+    std::iota(vec.begin(), vec.end(), 0);
+    std::shuffle(vec.begin(), vec.end(), std::mt19937{std::random_device{}()});
+
+    sort(vec.begin(), vec.end());
 
     ASSERT_TRUE(std::is_sorted(vec.cbegin(), vec.cend()));
 }

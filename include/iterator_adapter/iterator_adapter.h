@@ -273,7 +273,7 @@ namespace eld
         }
 
         // Iterator
-        value_type &operator*()
+        const value_type &operator*()
         {
             return *ptr_;
         }
