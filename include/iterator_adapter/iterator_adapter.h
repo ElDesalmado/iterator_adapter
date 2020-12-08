@@ -59,10 +59,13 @@ namespace eld
         using reference = T &;
         using iterator_category = std::random_access_iterator_tag;
 
+        // TODO: why error?
         template<typename RandomIter, typename = typename
         std::enable_if<
-                detail::iter_same_value_type<this_type, RandomIter>() &&
-                detail::iter_same_value_type<this_type, RandomIter>()
+//                detail::iter_same_value_type<this_type, RandomIter>() &&
+//                detail::iter_same_category<this_type, RandomIter>()
+                std::is_same<value_type, typename std::iterator_traits<RandomIter>::value_type>::value &&
+                std::is_same<iterator_category, typename std::iterator_traits<RandomIter>::iterator_category>::value
         >::type>
         constexpr explicit iterator_adapter(RandomIter iter)
                 : ptr_(&*iter)
@@ -75,7 +78,7 @@ namespace eld
         iterator_adapter(iterator_adapter &&other) noexcept
                 : ptr_(other.ptr_)
         {
-                    other.ptr_ = nullptr;
+            other.ptr_ = nullptr;
         }
 
         iterator_adapter &operator=(const iterator_adapter &other)
@@ -230,15 +233,17 @@ namespace eld
         using this_type = iterator_adapter<T, std::random_access_iterator_tag>;
     public:
         using difference_type = std::ptrdiff_t;
-        using value_type = const T;
+        using value_type = T;
         using pointer = const T *;
         using reference = const T &;
         using iterator_category = std::random_access_iterator_tag;
 
         template<typename RandomIter, typename = typename
         std::enable_if<
-                detail::iter_same_value_type<this_type, RandomIter>() &&
-                detail::iter_same_value_type<this_type, RandomIter>()
+//                detail::iter_same_value_type<this_type, RandomIter>() &&
+//                detail::iter_same_category<this_type, RandomIter>()
+                std::is_same<value_type, typename std::iterator_traits<RandomIter>::value_type>::value &&
+                std::is_same<iterator_category, typename std::iterator_traits<RandomIter>::iterator_category>::value
         >::type>
         constexpr explicit const_iterator_adapter(RandomIter iter)
                 : ptr_(&*iter)
@@ -251,7 +256,7 @@ namespace eld
         const_iterator_adapter(const_iterator_adapter &&other) noexcept
                 : ptr_(other.ptr_)
         {
-              other.ptr_ = nullptr;
+            other.ptr_ = nullptr;
         }
 
         const_iterator_adapter &operator=(const const_iterator_adapter &other)
@@ -402,6 +407,14 @@ namespace eld
     constexpr make_iter_adapter(Iter iter)
     {
         return iterator_adapter<detail::iterator_value_type_t<Iter>, detail::iterator_category_t<Iter>>(iter);
+    }
+
+    // TODO: make specialization of make_iter_adapter?
+    template<typename Iter>
+    const_iterator_adapter<detail::iterator_value_type_t<Iter>, detail::iterator_category_t<Iter>>
+    constexpr make_const_iter_adapter(Iter iter)
+    {
+        return const_iterator_adapter<detail::iterator_value_type_t<Iter>, detail::iterator_category_t<Iter>>(iter);
     }
 
 }
